@@ -1,6 +1,6 @@
 ﻿# contributors-Plugin
 On plugin activation a custom meta box will
-be added to post editor with all the
+be added in post editor with all the
 registered wordpress authors.
 
 An author can select/unselect available users.
