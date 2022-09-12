@@ -97,7 +97,7 @@ class Class_Post_Contributors {
 
 		if ( isset( $_POST['contributors-array'] ) ) {
 
-			$new_data = $_POST['contributors-array'];
+			$new_data = wp_unslash( $_POST['contributors-array'] );
 			$old_data = get_post_meta( $post_id, 'contributors-list' );
 			// Update post meta.
 			if ( ! empty( $old_data ) ) {
@@ -146,11 +146,10 @@ class Class_Post_Contributors {
 		foreach ( $contributors as $contributor ) {
 			$checked_value = in_array( $contributor->ID, $contributors_list, true ) ? 'checked' : '';
 
-			echo '<input type="checkbox" id="' . $contributor->ID . '" name="contributors-array[]" value= "' . $contributor->ID . '" ' . $checked_value . '>
-			<label for="' . $contributor->ID . '">' . $contributor->display_name . '</label><br>';
+			echo '<input type="checkbox" id="' . esc_attr( $contributor->ID ) . '" name="contributors-array[]" value= "' . esc_attr( $contributor->ID ) . '" ' . esc_attr( $checked_value ) . '>
+			<label for="' . esc_attr( $contributor->ID ) . '">' . esc_attr( $contributor->display_name ) . '</label><br>';
 
 		}
-
 	}
 }
 
