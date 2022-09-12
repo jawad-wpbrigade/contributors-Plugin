@@ -95,18 +95,18 @@ class Class_Post_Contributors {
 	 */
 	public function save_editor( $post_id ) {
 
-		$new_data = $_POST['contributors-array'] ?? array();
+		if ( isset( $_POST['contributors-array'] ) ) {
 
-		$old_data = get_post_meta( $post_id, 'contributors-list' );
-
-		// Update post meta.
-		if ( ! empty( $old_data ) ) {
-
-			update_post_meta( $post_id, 'contributors-list', $new_data );
-
+			$new_data = $_POST['contributors-array'];
+			$old_data = get_post_meta( $post_id, 'contributors-list' );
+			// Update post meta.
+			if ( ! empty( $old_data ) ) {
+				update_post_meta( $post_id, 'contributors-list', $new_data );
+			} else {
+				add_post_meta( $post_id, 'contributors-list', $new_data );
+			}
 		} else {
-			add_post_meta( $post_id, 'contributors-list', $new_data );
-
+			delete_post_meta( $post_id, 'contributors-list' );
 		}
 
 	}
