@@ -101,6 +101,12 @@ class Class_Post_Contributors {
 	 */
 	public function save_editor( $post_id ) {
 
+		$old_selection = get_post_meta( get_the_ID(), 'contributors-list', true );
+
+		if ( empty( $old_selection ) && empty( $_POST['contributors-array'] ) ) {
+			return;
+		}
+
 		if ( isset( $_POST['contributors-array'] ) && ! empty( $_POST['contributors-array'] ) ) {
 
 			$sanitized_contributors_list = wp_unslash( $_POST['contributors-array'] );
