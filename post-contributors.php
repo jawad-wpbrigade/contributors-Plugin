@@ -20,6 +20,8 @@
  * Author URI:        http://example.org
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:       post-contributors
+ * Domain Path:       /languages
  */
 
 // If this file is called directly, abort.
@@ -84,7 +86,7 @@ class Class_Post_Contributors {
 			$contributors .= "<div><a href = '$link'><p>$user->display_name</p></a></div>";
 		}
 
-		$heading  = '<h3>Contributors: </h3>';
+		$heading  = '<h3>' . __( 'Contributors: ', 'post-contributors' ) . '</h3>';
 		$content .= $heading;
 		$content .= $contributors;
 
@@ -111,7 +113,7 @@ class Class_Post_Contributors {
 
 			$sanitized_contributors_list = wp_unslash( $_POST['contributors-array'] );
 
-			// $sanitized_contributors_list = maybe_serialize( $contributors_list );
+			// $sanitized_contributors_list = maybe_serialize( $_POST['contributors-array'] );
 
 			foreach ( $sanitized_contributors_list as &$list_item ) {
 				$list_item = sanitize_text_field( $list_item );
@@ -169,7 +171,7 @@ class Class_Post_Contributors {
 
 			}
 		} else {
-			echo 'no users found.';
+			esc_html_e( 'No User Found', 'post-contributors' );
 		}
 	}
 }
