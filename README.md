@@ -1,4 +1,4 @@
-﻿# contributors-Plugin
+﻿# contributors-Plugin #
 On plugin activation a custom meta box will
 be added in post editor with all the
 registered wordpress authors.
