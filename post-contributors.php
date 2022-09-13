@@ -20,8 +20,6 @@
  * Author URI:        http://example.org
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       post-contributors
- * Domain Path:       /languages
  */
 
 // If this file is called directly, abort.
@@ -62,28 +60,36 @@ class Class_Post_Contributors {
 	 */
 	public function contributors_post_content( $content ) {
 
-		if ( get_post_type() === 'post' ) {
-
-			ob_start();
-
-			$contributors_id = get_post_meta( get_the_ID(), 'contributors-list', true );
-
-			if ( empty( $contributors_id ) ) {
-				return $content;
-			}
-
-			$contributors = '';
-
-			foreach ( $contributors_id as $contributor_id ) {
-				$user          = get_user_by( 'ID', $contributor_id );
-				$link          = get_author_posts_url( $user->ID, $user->user_nicename );
-				$contributors .= "<div><a href = '$link'><p>$user->display_name</p></a></div>";
-			}
-			$heading = '<h3>Contributors: </h3>';
-			$content = $content . $heading . $contributors;
-			ob_end_clean();
-			return $content;
+		if ( get_post_type() === 'page' || get_post_type() === 'attachment') {
+			return;
 		}
+
+		$contributors_id = get_post_meta( get_the_ID(), 'contributors-list', true );
+
+		if ( empty( $contributors_id ) ) {
+				return $content;
+		}
+
+		$contributors = '';
+
+		foreach ( $contributors_id as $contributor_id ) {
+			$user          = get_user_by( 'ID', $contributor_id );
+
+			if ( false === $user ) {
+					continue;
+			}
+
+			$link          = get_author_posts_url( $user->ID, $user->user_nicename );
+
+			$contributors .= "<div><a href = '$link'><p>$user->display_name</p></a></div>";
+		}
+
+		$heading  = '<h3>Contributors: </h3>';
+		$content .= $heading;
+		$content .= $contributors;
+
+		return $content;
+
 	}
 
 
@@ -95,28 +101,35 @@ class Class_Post_Contributors {
 	 */
 	public function save_editor( $post_id ) {
 
-		if ( isset( $_POST['contributors-array'] ) ) {
+		if ( isset( $_POST['contributors-array'] ) && ! empty( $_POST['contributors-array'] ) ) {
 
-			$new_data = wp_unslash( $_POST['contributors-array'] );
-			$old_data = get_post_meta( $post_id, 'contributors-list' );
-			// Update post meta.
-			if ( ! empty( $old_data ) ) {
-				update_post_meta( $post_id, 'contributors-list', $new_data );
-			} else {
-				add_post_meta( $post_id, 'contributors-list', $new_data );
+			$sanitized_contributors_list = wp_unslash( $_POST['contributors-array'] );
+
+			// $sanitized_contributors_list = maybe_serialize( $contributors_list );
+
+			foreach ( $sanitized_contributors_list as &$list_item ) {
+				$list_item = sanitize_text_field( $list_item );
 			}
+
+			update_post_meta( $post_id, 'contributors-list', $sanitized_contributors_list );
+
 		} else {
+
 			delete_post_meta( $post_id, 'contributors-list' );
+
 		}
 
 	}
 
 	/**
 	 * Contributor meta box
+	 * On post type and custom post types
 	 * adding id, label, screen here
 	 */
 	public function contributor_meta_box() {
-		add_meta_box( 'meta-id', 'Contributors', array( $this, 'contributor_meta_box_html' ), array( 'post' ) );
+		$post_types = get_post_types( array( 'public' => true ) );
+		unset( $post_types['page'], $post_types['attachment'] );
+		add_meta_box( 'meta-id', 'Contributors', array( $this, 'contributor_meta_box_html' ), $post_types );
 	}
 
 	/**
@@ -131,6 +144,7 @@ class Class_Post_Contributors {
 		$user_query = new WP_User_Query(
 			array(
 				'number' => '-1',
+				'role__in' => array( 'author','Administrator' ),
 				'fields' => array(
 					'user_nicename',
 					'display_name',
@@ -139,16 +153,17 @@ class Class_Post_Contributors {
 			)
 		);
 
-		// storing query result in $contributors variable.
-		$contributors = $user_query->get_results();
-
 		// looping through all the results in $contributors.
-		foreach ( $contributors as $contributor ) {
-			$checked_value = in_array( $contributor->ID, $contributors_list, true ) ? 'checked' : '';
+		if ( ! empty( $user_query->get_results() ) ) {
+			foreach ( $user_query->get_results() as $contributor ) {
+				$checked_value = in_array( $contributor->ID, $contributors_list, true ) ? 'checked' : '';
 
-			echo '<input type="checkbox" id="' . esc_attr( $contributor->ID ) . '" name="contributors-array[]" value= "' . esc_attr( $contributor->ID ) . '" ' . esc_attr( $checked_value ) . '>
-			<label for="' . esc_attr( $contributor->ID ) . '">' . esc_attr( $contributor->display_name ) . '</label><br>';
+				echo '<input type="checkbox" id="' . esc_attr( $contributor->ID ) . '" name="contributors-array[]" value= "' . esc_attr( $contributor->ID ) . '" ' . esc_attr( $checked_value ) . '>
+				<label for="' . esc_attr( $contributor->ID ) . '">' . esc_html( $contributor->display_name ) . '</label><br>';
 
+			}
+		} else {
+			echo 'no users found.';
 		}
 	}
 }
