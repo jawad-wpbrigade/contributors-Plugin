@@ -27,5 +27,9 @@ On individual post's the selected contributors will get rendered right after the
 
 ![contributors-on-frontend](https://user-images.githubusercontent.com/113098401/189868770-7f1803ec-6f74-4497-8219-068ac0431df8.png)
 
+## short-code
+Show list of contributors using shortcode `[contributors_shortcode]`.
+this short code will only works on posts not on pages.
+
 Reader can click on any contributor and will be redirected
 to the linked author page on website.

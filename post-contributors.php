@@ -9,7 +9,7 @@
  *
  * @link    http://example.org
  * @since   1.0.0
- * @package Meta_Box
+ * @package post_contributors
  *
  * @wordpress-plugin
  * Plugin Name:       Post Contributors
@@ -52,6 +52,15 @@ class Class_Post_Contributors {
 		add_action( 'add_meta_boxes', array( $this, 'contributor_meta_box' ) );
 		add_action( 'save_post', array( $this, 'save_editor' ) );
 		add_filter( 'the_content', array( $this, 'contributors_post_content' ), 99 );
+		$this->includes();
+	}
+
+	/**
+	 * Including all the files from includes folder
+	 */
+	public function includes() {
+		require_once plugin_dir_path( __FILE__ ) . 'includes/shortcode.php';
+
 	}
 
 	/**
@@ -62,8 +71,8 @@ class Class_Post_Contributors {
 	 */
 	public function contributors_post_content( $content ) {
 
-		if ( get_post_type() === 'page' || get_post_type() === 'attachment') {
-			return;
+		if ( get_post_type() === 'page' || get_post_type() === 'attachment' || ! is_singular() ) {
+			return $content;
 		}
 
 		$contributors_id = get_post_meta( get_the_ID(), 'contributors-list', true );
@@ -137,7 +146,7 @@ class Class_Post_Contributors {
 	public function contributor_meta_box() {
 		$post_types = get_post_types( array( 'public' => true ) );
 		unset( $post_types['page'], $post_types['attachment'] );
-		add_meta_box( 'meta-id', 'Contributors', array( $this, 'contributor_meta_box_html' ), $post_types );
+		add_meta_box( 'meta-id', 'Contributors', array( $this, 'contributor_meta_box_html' ), $post_types, 'side', 'high' );
 	}
 
 	/**
