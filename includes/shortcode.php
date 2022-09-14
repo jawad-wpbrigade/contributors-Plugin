@@ -1,34 +1,62 @@
 <?php
 /**
- * Use shortcode to show data from plugin
+ * File to add shortcode.
  *
- * @since   1.0.0
  * @package post_contributors
- * @author Jawad Malik
+ * @since 1.0.0
+ * @version 1.0.0
  */
-function contributors_shortcode_func( $atts ) {
 
-	$contributors = get_post_meta( get_the_ID(), 'contributors-list', true );
+/**
+ * Callback function for shortcode api
+ */
+function contributors_shortcode_func() {
 
-	if ( empty( $contributors ) || is_page() ) {
-		return 'this is not what it was meant to be used for.';
-	}
+   $contributors = get_post_meta( get_the_ID(), 'contributors-list', true );
 
-	$shortcode_content = '<p>Contributors: ';
-	foreach ( $contributors  as $contributor ) {
-		$user = get_user_by( 'ID', $contributor );
+   if( empty( $contributors ) ) {
+      return 'no contributors found';
+   }
+
+   if( is_page() ) {
+      return 'you cannot use this shortcode on pages.';
+   }
+
+   $shortcode_content = '<p>Contributors: ';
+
+   
+   $last_contributor_index = count( $contributors );
+
+   $iteration = 1;
+	foreach ($contributors  as $contributor) {
+      $user          = get_user_by( 'ID', $contributor );
 
 		if ( false === $user ) {
 			continue;
 		}
 
-		$link = get_author_posts_url( $user->ID, $user->user_nicename );
+		$link          = get_author_posts_url( $user->ID, $user->user_nicename );
 
-		$shortcode_content .= "<a href = '$link'>$user->display_name</a>, ";
-	}
+      if ( 1 === $last_contributor_index) {
+         $shortcode_content .= "<a href = '$link'>$user->display_name</a> ";
+         continue;
+      }
+      if ( $iteration === $last_contributor_index ) {
+         $shortcode_content .= "and <a href = '$link'>$user->display_name</a> ";
+         continue;
+      }
+      if ( $iteration === $last_contributor_index - 1 ) {
+         $shortcode_content .= "<a href = '$link'>$user->display_name</a> ";
+         $iteration++;
+         continue;
+      }
 
-	$shortcode_content .= '.</p>';
+      $shortcode_content .= "<a href = '$link'>$user->display_name</a>, ";
+      $iteration++;
+   }
+   
+   $shortcode_content .= '.</p>';
 
-	return $shortcode_content;
+   return $shortcode_content;
 }
 add_shortcode( 'contributors_shortcode', 'contributors_shortcode_func' );
