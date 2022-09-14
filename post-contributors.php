@@ -60,6 +60,7 @@ class Class_Post_Contributors {
 	 */
 	public function includes() {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/shortcode.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/post-contributors-widget.php';
 
 	}
 
